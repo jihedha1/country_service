@@ -5,7 +5,7 @@ pipeline {
     // 2. Définition des outils requis
     tools {
         // 'mymaven' doit correspondre au nom que vous avez donné à votre configuration Maven dans Jenkins
-        maven 'mymaven'
+        maven 'M2_HOME'
         // 'JDK21' doit correspondre au nom de votre configuration JDK
         jdk 'JDK21'
     }
