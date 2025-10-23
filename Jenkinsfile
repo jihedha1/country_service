@@ -43,6 +43,26 @@ pipeline {
             }
         }
     }
+    stage('Deploy Application') {
+                steps {
+                    echo 'Deploying the application...'
+                    sh '''
+                        # 1. Tuer l'ancien processus de l'application s'il existe
+                        # Le '|| true' évite une erreur si le processus n'est pas trouvé
+                        pkill -f 'FirstMicroService-0.0.1-SNAPSHOT.jar' || true
+
+                        # 2. Copier le nouvel artefact vers le répertoire de déploiement
+                        cp target/FirstMicroService-0.0.1-SNAPSHOT.jar /var/www/my-app/app.jar
+
+                        # 3. Démarrer la nouvelle version de l'application en arrière-plan
+                        # 'nohup' permet à l'application de continuer à tourner même si le pipeline se termine
+                        # '&' lance le processus en arrière-plan
+                        # '>/dev/null 2>&1' redirige les logs pour ne pas bloquer le pipeline
+                        nohup java -jar /var/www/my-app/app.jar > /dev/null 2>&1 &
+                    '''
+                }
+            }
+        }
 
     post {
         always {
