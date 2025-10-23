@@ -61,8 +61,7 @@ pipeline {
                         nohup java -jar /var/www/my-app/app.jar > /dev/null 2>&1 &
                     '''
                 }
-            }
-        }
+    }
 
     post {
         always {
