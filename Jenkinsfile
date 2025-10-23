@@ -5,8 +5,6 @@ pipeline {
         maven 'M2_HOME'
         jdk 'JDK21'
     }
-
-    // Le bloc 'stages' commence ici et contient TOUTES les étapes
     stages {
 
         stage('Compile, test code and package') {
@@ -19,56 +17,36 @@ pipeline {
                 }
             }
         }
+        stage('Build and Push Docker Image') {
+                    steps {
+                        // Construit l'image Docker. Le "." indique que le Dockerfile est dans le répertoire courant.
+                        // Le tag de l'image est le numéro du build Jenkins (ex: my-country-service:1, my-country-service:2, etc.)
+                        sh "docker build -t jihedhallem/my-country-service:${env.BUILD_NUMBER} ."
 
-        stage('SonarQube Analysis') {
-            steps {
-                withSonarQubeEnv('MySonarQubeServer') {
-                    sh "mvn sonar:sonar -Dsonar.projectKey=country-service"
-                }
-            }
-        }
+                        // Se connecte à Docker Hub en utilisant les credentials que vous venez de configurer
+                        withCredentials([string(credentialsId: 'dockerhub-pwd', variable: 'dockerhubpwd')]) {
+                            sh "docker login -u jihedhallem -p ${dockerhubpwd}"
+                        }
 
-        stage('Publish to Nexus') {
-            steps {
-                withCredentials([usernamePassword(credentialsId: 'nexus-credentials', usernameVariable: 'NEXUS_USERNAME', passwordVariable: 'NEXUS_PASSWORD')]) {
-                    configFileProvider([configFile(fileId: 'nexus-settings', variable: 'MAVEN_SETTINGS')]) {
-                        sh 'mvn deploy -s $MAVEN_SETTINGS'
+                        // Pousse l'image vers votre dépôt Docker Hub
+                        sh "docker push jihedhallem/my-country-service:${env.BUILD_NUMBER}"
                     }
                 }
-            }
-        }
 
-        // L'étape 'Deploy Application' est maintenant À L'INTÉRIEUR du bloc 'stages'
-        stage('Deploy Application') {
-            steps {
-                echo 'Deploying the application...'
-                sh '''
-                   sudo mkdir -p /var/www/my-app
-                   sudo pkill -f 'app.jar' || true
-                   sudo cp target/FirstMicroService-0.0.1-SNAPSHOT.jar /var/www/my-app/app.jar
-                   sudo chown jenkins:jenkins /var/www/my-app/app.jar
+                stage('Deploy Microservice') {
+                    steps {
+                        // Cette approche est simple mais brutale : elle arrête et supprime le conteneur précédent s'il existe.
+                        // L'option -f force la suppression même si le conteneur est en cours d'exécution.
+                        // '|| true' est une astuce pour que la commande n'échoue pas si aucun conteneur n'existe.
+                        sh 'docker stop my-app || true && docker rm my-app || true'
 
-                   # Créer le fichier log et donner les droits à jenkins
-                   sudo touch /var/www/my-app/app.log
-                   sudo chown jenkins:jenkins /var/www/my-app/app.log
-
-                   # Démarrer l'application (en tant que jenkins)
-                   nohup java -jar /var/www/my-app/app.jar > /var/www/my-app/app.log 2>&1 &
-               '''
-            }
-        }
-
-    } // L'accolade fermante du bloc 'stages' est ici
-
-    post {
-        always {
-            echo 'Pipeline finished.'
-        }
-        success {
-            echo 'Pipeline executed successfully!'
-        }
-        failure {
-            echo 'Pipeline failed!'
+                        // Lance un nouveau conteneur avec la nouvelle image
+                        // -d : mode détaché (le conteneur tourne en arrière-plan)
+                        // -p 8087:8087 : mappe le port 8087 de l'hôte au port 8087 du conteneur
+                        // --name my-app : donne un nom fixe au conteneur pour le retrouver facilement
+                        sh "docker run -d -p 8087:8087 --name my-app jihedhallem/my-country-service:${env.BUILD_NUMBER}"
+                    }
+                }
         }
     }
 }
