@@ -43,16 +43,15 @@ pipeline {
             steps {
                 echo 'Deploying the application...'
                 sh '''
-                    # 1. Créer le répertoire de déploiement s'il n'existe pas
-                    mkdir -p /var/www/my-app
+                    # Utiliser sudo pour toutes les commandes nécessitant des privilèges
+                    sudo mkdir -p /var/www/my-app
+                    sudo pkill -f 'app.jar' || true
+                    sudo cp target/FirstMicroService-0.0.1-SNAPSHOT.jar /var/www/my-app/app.jar
 
-                    # 2. Tuer l'ancien processus de l'application s'il existe
-                    pkill -f 'app.jar' || true
+                    # Changer le propriétaire du fichier pour l'utilisateur jenkins (bonne pratique)
+                    sudo chown jenkins:jenkins /var/www/my-app/app.jar
 
-                    # 3. Copier le nouvel artefact vers le répertoire de déploiement
-                    cp target/FirstMicroService-0.0.1-SNAPSHOT.jar /var/www/my-app/app.jar
-
-                    # 4. Démarrer la nouvelle version de l'application en arrière-plan
+                    # Démarrer l'application
                     nohup java -jar /var/www/my-app/app.jar > /var/www/my-app/app.log 2>&1 &
                 '''
             }
