@@ -48,7 +48,7 @@ pipeline {
                    sudo cp target/FirstMicroService-0.0.1-SNAPSHOT.jar /var/www/my-app/app.jar
                    sudo chown jenkins:jenkins /var/www/my-app/app.jar
 
-                   # Créer le fichier log , donner les droits à jenkins
+                   # Créer le fichier log  donner les droits à jenkins
                    sudo touch /var/www/my-app/app.log
                    sudo chown jenkins:jenkins /var/www/my-app/app.log
 
