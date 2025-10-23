@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor @NoArgsConstructor @Data
 public class Country {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    //webhook declancher
     private int id;
     private String name;
     private String capital;
