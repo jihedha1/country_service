@@ -43,17 +43,18 @@ pipeline {
             steps {
                 echo 'Deploying the application...'
                 sh '''
-                    # Utiliser sudo pour toutes les commandes nécessitant des privilèges
-                    sudo mkdir -p /var/www/my-app
-                    sudo pkill -f 'app.jar' || true
-                    sudo cp target/FirstMicroService-0.0.1-SNAPSHOT.jar /var/www/my-app/app.jar
+                   sudo mkdir -p /var/www/my-app
+                   sudo pkill -f 'app.jar' || true
+                   sudo cp target/FirstMicroService-0.0.1-SNAPSHOT.jar /var/www/my-app/app.jar
+                   sudo chown jenkins:jenkins /var/www/my-app/app.jar
 
-                    # Changer le propriétaire du fichier pour l'utilisateur jenkins (bonne pratique)
-                    sudo chown jenkins:jenkins /var/www/my-app/app.jar
+                   # Créer le fichier log et donner les droits à jenkins
+                   sudo touch /var/www/my-app/app.log
+                   sudo chown jenkins:jenkins /var/www/my-app/app.log
 
-                    # Démarrer l'application
-                    nohup java -jar /var/www/my-app/app.jar > /var/www/my-app/app.log 2>&1 &
-                '''
+                   # Démarrer l'application (en tant que jenkins)
+                   nohup java -jar /var/www/my-app/app.jar > /var/www/my-app/app.log 2>&1 &
+               '''
             }
         }
 
