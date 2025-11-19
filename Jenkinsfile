@@ -20,8 +20,7 @@ pipeline {
         stage('Deploy using ansible playbook') {
                     steps {
                         script {
-                            // Construire l'image Docker en utilisant le playbook Ansible
-                            sh 'ansible-playbook -i localhost, ansible-playbook.yml'
+                            sh 'ansible-playbook -i localhost, playbookCICD.yaml'
                         }
                     }
                 }
