@@ -17,32 +17,14 @@ pipeline {
             }
         }
 
-        stage('Build Docker Image') {
+        stage('Deploy using ansible playbook') {
                     steps {
                         script {
                             // Construire l'image Docker en utilisant le playbook Ansible
-                            sh 'ansible-playbook -i localhost, deploy.yml'
+                            sh 'ansible-playbook -i localhost, ansible-playbook.yml'
                         }
                     }
                 }
-
-        stage('Push Docker Image to Docker Hub') {
-            steps {
-                script {
-                    // Pousser l'image Docker vers Docker Hub
-                    sh 'ansible-playbook -i localhost, deploy.yml'
-                }
-            }
-        }
-
-        stage('Deploy to Kubernetes') {
-            steps {
-                script {
-                    // Déployer l'image Docker sur Kubernetes
-                    sh 'ansible-playbook -i localhost, deploy.yml'
-                }
-            }
-        }
     }
 
     post {
