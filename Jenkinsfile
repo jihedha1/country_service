@@ -1,13 +1,11 @@
 pipeline {
     agent any
-
     tools {
         maven 'M2_HOME'
         jdk 'JDK21'
     }
 
     stages {
-
         stage('Compile, test code and package') {
             steps {
                 sh 'mvn clean install'
@@ -22,8 +20,8 @@ pipeline {
         stage('Build Docker Image') {
                     steps {
                         script {
-                            // Construire l'image Docker avec Ansible
-                            sh 'ansible-playbook -i localhost, build-docker.yml'
+                            // Construire l'image Docker en utilisant le playbook Ansible
+                            sh 'ansible-playbook -i localhost, deploy.yml'
                         }
                     }
                 }
@@ -32,7 +30,7 @@ pipeline {
             steps {
                 script {
                     // Pousser l'image Docker vers Docker Hub
-                    sh 'ansible-playbook -i localhost, push-docker.yml'
+                    sh 'ansible-playbook -i localhost, deploy.yml'
                 }
             }
         }
@@ -41,7 +39,7 @@ pipeline {
             steps {
                 script {
                     // Déployer l'image Docker sur Kubernetes
-                    sh 'ansible-playbook -i localhost, deploy-k8s.yml'
+                    sh 'ansible-playbook -i localhost, deploy.yml'
                 }
             }
         }
