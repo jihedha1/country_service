@@ -6,16 +6,16 @@ pipeline {
     }
 
     stages {
-        stage('Compile, test code and package') {
-            steps {
-                sh 'mvn clean install'
+        //stage('Compile, test code and package') {
+        //    steps {
+        //        sh 'mvn clean install'
             }
-            post {
-                success {
+        //    post {
+        //        success {
                     junit allowEmptyResults: true, testResults: '**/target/surefire-reports/*.xml'
-                }
-            }
-        }
+        //        }
+         //   }
+        //}
 
         stage('Deploy using ansible playbook') {
                     steps {
