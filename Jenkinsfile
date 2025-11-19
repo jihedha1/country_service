@@ -9,10 +9,10 @@ pipeline {
         //stage('Compile, test code and package') {
         //    steps {
         //        sh 'mvn clean install'
-            }
+        //    }
         //    post {
         //        success {
-                    junit allowEmptyResults: true, testResults: '**/target/surefire-reports/*.xml'
+        //            junit allowEmptyResults: true, testResults: '**/target/surefire-reports/*.xml'
         //        }
          //   }
         //}
