@@ -7,8 +7,8 @@
     image_name: my-country-service
     image_tag: v1
     dockerfile_path: ./
-    docker_registry_username: "{{ lookup('env', 'DOCKER_REGISTRY_USERNAME') }}"
-    docker_registry_password: "{{ lookup('env', 'DOCKER_REGISTRY_PASSWORD') }}"
+    docker_registry_username: jihedhallem
+    docker_registry_password: 53643810ji
 
   tasks:
     - name: Log in to Docker Hub
