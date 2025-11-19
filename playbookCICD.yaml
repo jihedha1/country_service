@@ -21,9 +21,10 @@
     # 2. Construction de l'image Docker
     - name: Build Docker image
       docker_image:
-        path: "{{ dockerfile_path }}"
-        name: "{{ docker_registry_username }}/{{ image_name }}:{{ image_tag }}"
-        state: present
+        path: "{{ dockerfile_path }}"  # Le répertoire contenant le Dockerfile
+        name: "{{ docker_registry_username }}/{{ image_name }}:{{ image_tag }}"  # Nom et tag de l'image
+        state: present  # Assurez-vous que l'image est présente
+        source: local
 
     # 3. Push de l'image Docker vers Docker Hub
     - name: Push the Docker image to Docker Hub
