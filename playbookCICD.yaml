@@ -2,53 +2,45 @@
 - name: Build, Push Docker Image to Docker Hub, and Deploy to Kubernetes
   hosts: localhost
   connection: local
+
   vars:
     image_name: my-country-service
     image_tag: v1
     dockerfile_path: ./
     docker_registry_username: "{{ lookup('env', 'DOCKER_REGISTRY_USERNAME') }}"
     docker_registry_password: "{{ lookup('env', 'DOCKER_REGISTRY_PASSWORD') }}"
-    kubernetes_kubeconfig: "{{ lookup('env', 'KUBECONFIG_PATH') }}"  # Chemin vers votre kubeconfig
 
-    tasks:
-      - name: Log in to Docker Hub
-        community.general.docker_login:
-          username: "{{ docker_registry_username }}"
-          password: "{{ docker_registry_password }}" # Pour la production, utilisez une variable d'environnement ou Ansible Vault
-          reauthorize: yes # Se ré-authentifier même si les identifiants existent
+  tasks:
+    - name: Log in to Docker Hub
+      community.general.docker_login:
+        username: "{{ docker_registry_username }}"
+        password: "{{ docker_registry_password }}"
+        reauthorize: yes
 
-      - name: Build Docker image
-        docker_image:
-          build:
-            path: "{{ dockerfile_path }}"
-          name: "{{ docker_registry_username }}/{{ image_name }}:{{ image_tag }}"
-          source: build
-          state: present
-          tag: "{{ image_tag }}"
+    - name: Build Docker image
+      community.docker.docker_image: # Utiliser le nom complet de la collection est une bonne pratique
+        build:
+          path: "{{ dockerfile_path }}"
+        name: "{{ docker_registry_username }}/{{ image_name }}:{{ image_tag }}"
+        source: build
+        state: present
 
-      - name: Push the Docker image to Docker Hub
-        docker_image:
-          name: "{{ docker_registry_username }}/{{ image_name }}:{{ image_tag }}"
-          tag: "{{ image_tag }}"
-          push: yes
-          source: local
+    - name: Push the Docker image to Docker Hub
+      community.docker.docker_image:
+        name: "{{ docker_registry_username }}/{{ image_name }}:{{ image_tag }}"
+        push: yes
+        source: local
 
-      - name: Pull Docker image (optional, for verification or on target nodes)
-        docker_image:
-          name: "{{ docker_registry_username }}/{{ image_name }}:{{ image_tag }}"
-          tag: "{{ image_tag }}"
-          source: pull
+    - name: Apply Kubernetes Deployment
+      kubernetes.core.k8s:
+        state: present
+        namespace: jenkins
+        src: deployment.yaml
+        kubeconfig: config
 
-      - name: Apply Kubernetes Deployment
-        kubernetes.core.k8s:
-          state: present
-          namespace: jenkins
-          src: deployment.yaml
-          kubeconfig: config
-
-      - name: Apply Kubernetes Service
-        kubernetes.core.k8s:
-          state: present
-          namespace: jenkins
-          src: service.yaml
-          kubeconfig: config
+    - name: Apply Kubernetes Service
+      kubernetes.core.k8s:
+        state: present
+        namespace: jenkins
+        src: service.yaml
+        kubeconfig: config
