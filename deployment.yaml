@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: my-country-service
+  namespace: jenkins
 spec:
   replicas: 3
   selector:
@@ -12,8 +13,14 @@ spec:
       labels:
         app: country-service
     spec:
+      # --- LA SECTION À AJOUTER ---
+      # Indique à Kubernetes d'utiliser ce secret pour télécharger les images de ce pod
+      imagePullSecrets:
+        - name: dockerhub-secret
+      # ---------------------------
       containers:
         - name: country-service-container
-          image: jihedhallem/my-country-service:3
+          # Assurez-vous que le tag de l'image correspond à celui que vous construisez
+          image: jihedhallem/my-country-service:v1
           ports:
             - containerPort: 8087
