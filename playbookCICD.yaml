@@ -36,7 +36,7 @@
         state: present
         namespace: jenkins
         src: deployment.yaml
-        kubeconfig: config
+        kubeconfig: ./config.yml
         validate_certs: no
 
     - name: Apply Kubernetes Service
@@ -44,5 +44,5 @@
         state: present
         namespace: jenkins
         src: service.yaml
-        kubeconfig: config
+        kubeconfig: ./config.yml
         validate_certs: no
