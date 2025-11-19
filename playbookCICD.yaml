@@ -10,47 +10,45 @@
     docker_registry_password: "{{ lookup('env', 'DOCKER_REGISTRY_PASSWORD') }}"
     kubernetes_kubeconfig: "{{ lookup('env', 'KUBECONFIG_PATH') }}"  # Chemin vers votre kubeconfig
 
-  tasks:
-    # 1. Connexion à Docker Hub
-    - name: Log in to Docker Hub
-      community.general.docker_login:
-        username: "{{ docker_registry_username }}"
-        password: "{{ docker_registry_password }}"
-        reauthorize: yes
+    tasks:
+      - name: Log in to Docker Hub
+        community.general.docker_login:
+          username: "{{ docker_registry_username }}"
+          password: "{{ docker_registry_password }}" # Pour la production, utilisez une variable d'environnement ou Ansible Vault
+          reauthorize: yes # Se ré-authentifier même si les identifiants existent
 
-    # 2. Construction de l'image Docker
-    - name: Build Docker image
-      docker_image:
-        path: "{{ dockerfile_path }}"  # Le répertoire contenant le Dockerfile
-        name: "{{ docker_registry_username }}/{{ image_name }}:{{ image_tag }}"  # Nom et tag de l'image
-        state: present  # Assurez-vous que l'image est présente
-        source: local
+      - name: Build Docker image
+        docker_image:
+          build:
+            path: "{{ dockerfile_path }}"
+          name: "{{ docker_registry_username }}/{{ image_name }}:{{ image_tag }}"
+          source: build
+          state: present
+          tag: "{{ image_tag }}"
 
-    # 3. Push de l'image Docker vers Docker Hub
-    - name: Push the Docker image to Docker Hub
-      docker_image:
-        name: "{{ docker_registry_username }}/{{ image_name }}:{{ image_tag }}"
-        push: yes
-        source: local
+      - name: Push the Docker image to Docker Hub
+        docker_image:
+          name: "{{ docker_registry_username }}/{{ image_name }}:{{ image_tag }}"
+          tag: "{{ image_tag }}"
+          push: yes
+          source: local
 
-    # 4. Tirer l'image Docker (facultatif, pour vérifier ou sur les nœuds cibles)
-    - name: Pull Docker image (optional, for verification or on target nodes)
-      docker_image:
-        name: "{{ docker_registry_username }}/{{ image_name }}:{{ image_tag }}"
-        source: pull
+      - name: Pull Docker image (optional, for verification or on target nodes)
+        docker_image:
+          name: "{{ docker_registry_username }}/{{ image_name }}:{{ image_tag }}"
+          tag: "{{ image_tag }}"
+          source: pull
 
-    # 5. Appliquer le déploiement sur Kubernetes
-    - name: Apply Kubernetes Deployment
-      kubernetes.core.k8s:
-        state: present
-        namespace: default  # Vous pouvez changer le namespace selon vos besoins
-        src: deployment.yaml
-        kubeconfig: config
+      - name: Apply Kubernetes Deployment
+        kubernetes.core.k8s:
+          state: present
+          namespace: jenkins
+          src: deployment.yaml
+          kubeconfig: config
 
-    # 6. Appliquer le service Kubernetes
-    - name: Apply Kubernetes Service
-      kubernetes.core.k8s:
-        state: present
-        namespace: default
-        src: service.yaml
-        kubeconfig: config
+      - name: Apply Kubernetes Service
+        kubernetes.core.k8s:
+          state: present
+          namespace: jenkins
+          src: service.yaml
+          kubeconfig: config
