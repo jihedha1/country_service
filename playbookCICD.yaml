@@ -37,6 +37,7 @@
         namespace: jenkins
         src: deployment.yaml
         kubeconfig: config
+        validate_certs: no
 
     - name: Apply Kubernetes Service
       kubernetes.core.k8s:
@@ -44,3 +45,4 @@
         namespace: jenkins
         src: service.yaml
         kubeconfig: config
+        validate_certs: no
