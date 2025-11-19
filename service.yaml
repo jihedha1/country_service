@@ -8,6 +8,6 @@ spec:
     app: country-service  # TRÈS IMPORTANT : Doit correspondre aux labels de vos pods
   ports:
     - protocol: TCP
-      port: 8080          # Port sur lequel le service écoute à l'intérieur du cluster
+      port: 8086         # Port sur lequel le service écoute à l'intérieur du cluster
       targetPort: 8087    # Port sur lequel votre conteneur écoute (défini dans deployment.yaml)
       nodePort : 30007
