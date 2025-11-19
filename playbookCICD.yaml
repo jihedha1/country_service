@@ -9,6 +9,8 @@
     dockerfile_path: ./
     docker_registry_username: jihedhallem
     docker_registry_password: 53643810ji
+    kubernetes_api_host: "https://kubernetes.docker.internal:6443"
+    kubernetes_api_key: "{{ lookup('env', 'K8S_API_TOKEN' ) }}"
 
   tasks:
     - name: Log in to Docker Hub
@@ -36,13 +38,15 @@
         state: present
         namespace: jenkins
         src: deployment.yaml
-        kubeconfig: ./config.yml
         validate_certs: no
+        host: "{{ kubernetes_api_host }}"
+        api_key: "{{ kubernetes_api_key }}"
 
     - name: Apply Kubernetes Service
       kubernetes.core.k8s:
         state: present
         namespace: jenkins
         src: service.yaml
-        kubeconfig: ./config.yml
         validate_certs: no
+        host: "{{ kubernetes_api_host }}"
+        api_key: "{{ kubernetes_api_key }}"

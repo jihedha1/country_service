@@ -4,6 +4,9 @@ pipeline {
         maven 'M2_HOME'
         jdk 'JDK21'
     }
+    environment {
+        K8S_API_TOKEN = credentials('k8s-deployer-token')
+    }
 
     stages {
         //stage('Compile, test code and package') {
