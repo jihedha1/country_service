@@ -19,36 +19,40 @@ pipeline {
             }
         }
 
-        stage('Build and Push Docker Image') {
-            steps {
-                // Construit l'image avec un tag unique basé sur le numéro de build
-                sh "docker build -t jihedhallem/my-country-service:${env.BUILD_NUMBER} ."
-
-                // S'authentifie à Docker Hub en utilisant les credentials stockés dans Jenkins
-                withCredentials([string(credentialsId: 'dockerhub-pwd', variable: 'dockerhubpwd')]) {
-                    sh "docker login -u jihedhallem -p ${dockerhubpwd}"
+        stage('Build Docker Image') {
+                    steps {
+                        script {
+                            // Construire l'image Docker avec Ansible
+                            sh 'ansible-playbook -i localhost, build-docker.yml'
+                        }
+                    }
                 }
 
-                // Pousse l'image vers Docker Hub
-                sh "docker push jihedhallem/my-country-service:${env.BUILD_NUMBER}"
+        stage('Push Docker Image to Docker Hub') {
+            steps {
+                script {
+                    // Pousser l'image Docker vers Docker Hub
+                    sh 'ansible-playbook -i localhost, push-docker.yml'
+                }
             }
         }
 
         stage('Deploy to Kubernetes') {
             steps {
                 script {
-                    // S'authentifie au cluster Kubernetes en utilisant le kubeconfig stocké dans Jenkins
-                    kubeconfig(credentialsId: 'kubeconfig-file', serverUrl: '') {
-                        // IMPORTANT : Avant d'appliquer, il faut mettre à jour le tag de l'image dans le fichier de déploiement
-                        sh "sed -i 's|image: .*|image: jihedhallem/my-country-service:${env.BUILD_NUMBER}|g' deployment.yaml"
-
-                        // Applique les configurations au cluster
-                        sh 'kubectl apply -f deployment.yaml'
-                        sh 'kubectl apply -f service.yaml'
-                    }
+                    // Déployer l'image Docker sur Kubernetes
+                    sh 'ansible-playbook -i localhost, deploy-k8s.yml'
                 }
             }
         }
+    }
 
+    post {
+        success {
+            echo "Pipeline completed successfully!"
+        }
+        failure {
+            echo "Pipeline failed, please check the logs."
+        }
     }
 }
