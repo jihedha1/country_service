@@ -34,8 +34,9 @@ pipeline {
 
         stage('3. Deploy with Ansible') {
             steps {
-                // Exécute le playbook Ansible pour le build, push et deploy
-                sh 'ansible-playbook -i localhost, playbookCICD.yaml'
+                withCredentials([file(credentialsId: 'k8s-token-file', variable: 'K8S_TOKEN_FILE_PATH')]) {
+                    sh 'ansible-playbook -i localhost, playbookCICD.yaml'
+                }
             }
         }
     }
