@@ -34,7 +34,7 @@ pipeline {
 
         stage('3. Deploy with Ansible') {
             steps {
-                withCredentials([file(credentialsId: 'k8s-token-file', variable: 'K8S_TOKEN_FILE_PATH')]) {
+                withCredentials([file(credentialsId: 'k8s-deployer-token', variable: 'K8S_API_TOKEN')]) {
                     sh 'ansible-playbook -i localhost, playbookCICD.yaml'
                 }
             }
