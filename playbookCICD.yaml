@@ -32,21 +32,14 @@
         push: yes
         source: local
 
-    - name: Update Kubernetes Deployment with new image
+    - name: Apply Kubernetes Deployment
       kubernetes.core.k8s:
         state: present
         namespace: jenkins
-        definition:
-          apiVersion: apps/v1
-          kind: Deployment
-          metadata:
-            name: my-country-service
-          spec:
-            template:
-              spec:
-                containers:
-                  - name: my-country-service-container
-                    image: "{{ docker_registry_username }}/{{ image_name }}:{{ image_tag }}"
+        src: deployment.yaml
+        validate_certs: no
+        host: "{{ kubernetes_api_host }}"
+        api_key: "{{ kubernetes_api_key }}"
 
     - name: Apply Kubernetes Service
       kubernetes.core.k8s:
