@@ -31,8 +31,15 @@ pipeline {
                 }
             }
         }
+        stage('3.SonarQube Analysis') {
+                    steps {
+                        withSonarQubeEnv('MySonarQubeServer') {
+                            sh "mvn sonar:sonar -Dsonar.projectKey=country-service"
+                        }
+                    }
+       }
 
-        stage('3. Deploy with Ansible') {
+        stage('4. Deploy with Ansible') {
             steps {
                 sh 'ansible-playbook -i localhost, playbookCICD.yaml'
             }

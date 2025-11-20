@@ -11,6 +11,10 @@ spec:
     metadata:
       labels:
         app: country-service
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: "/actuator/prometheus"
+        prometheus.io/port: "8087
     spec:
       containers:
         - name: country-service-container
