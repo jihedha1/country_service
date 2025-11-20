@@ -1,27 +1,28 @@
 ---
-- name: Build, Push Docker Image and Deploy to Kubernetes
+- name: Build, Push Docker Image to Docker Hub, and Deploy to Kubernetes
   hosts: localhost
   connection: local
 
   vars:
     image_name: my-country-service
-    image_tag: "build-{{ lookup('env', 'BUILD_NUMBER') }}" # Tag unique pour chaque build
+    image_tag: v1
+    dockerfile_path: ./
     docker_registry_username: jihedhallem
     docker_registry_password: 53643810ji
-    kubernetes_api_key: "{{ lookup('env', 'K8S_API_TOKEN') }}"
     kubernetes_api_host: "https://kubernetes.docker.internal:6443"
+    kubernetes_api_key: "{{ lookup('env', 'K8S_API_TOKEN' ) }}"
 
   tasks:
     - name: Log in to Docker Hub
       community.general.docker_login:
         username: "{{ docker_registry_username }}"
-        password: "{{ lookup('env', 'DOCKER_REGISTRY_PASSWORD' ) }}"
+        password: "{{ docker_registry_password }}"
         reauthorize: yes
 
     - name: Build Docker image
-      community.docker.docker_image:
+      community.docker.docker_image: # Utiliser le nom complet de la collection est une bonne pratique
         build:
-          path: ./
+          path: "{{ dockerfile_path }}"
         name: "{{ docker_registry_username }}/{{ image_name }}:{{ image_tag }}"
         source: build
         state: present
@@ -32,21 +33,14 @@
         push: yes
         source: local
 
-    - name: Update Kubernetes Deployment with new image
+    - name: Apply Kubernetes Deployment
       kubernetes.core.k8s:
         state: present
         namespace: jenkins
-        definition:
-          apiVersion: apps/v1
-          kind: Deployment
-          metadata:
-            name: my-country-service
-          spec:
-            template:
-              spec:
-                containers:
-                  - name: my-country-service-container
-                    image: "{{ docker_registry_username }}/{{ image_name }}:{{ image_tag }}"
+        src: deployment.yaml
+        validate_certs: no
+        host: "{{ kubernetes_api_host }}"
+        api_key: "{{ kubernetes_api_key }}"
 
     - name: Apply Kubernetes Service
       kubernetes.core.k8s:
