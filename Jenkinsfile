@@ -46,6 +46,7 @@ pipeline {
                                         export KUBECONFIG=$KUBECONFIG_FILE
                                         ansible-playbook -i localhost, playbookCICD.yaml
                                     '''
+                }
             }
         }
     }
