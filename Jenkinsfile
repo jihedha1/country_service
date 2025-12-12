@@ -8,7 +8,7 @@ pipeline {
 
     // Gestion des secrets via les credentials Jenkins
     environment {
-        K8S_API_TOKEN = credentials('k8s-deployer-token')
+        KUBECONFIG = '/home/jihed/.kube/config'
     }
 
     stages {

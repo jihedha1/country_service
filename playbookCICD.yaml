@@ -35,11 +35,8 @@
     - name: Apply Kubernetes Deployment
       kubernetes.core.k8s:
         state: present
-        namespace: jenkins
+        namespace: default
         src: deployment.yaml
-        validate_certs: no
-        host: "{{ kubernetes_api_host }}"
-        api_key: "{{ kubernetes_api_key }}"
 
     - name: Apply Kubernetes Service
       kubernetes.core.k8s:
