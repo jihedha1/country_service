@@ -41,7 +41,10 @@ pipeline {
 
         stage('4. Deploy with Ansible') {
             steps {
-                sh 'ansible-playbook -i localhost, playbookCICD.yaml'
+                withCredentials([file(credentialsId: 'kubeconfig-docker-desktop', variable: 'KUBECONFIG_FILE')]) {
+                                    sh '''
+                                        export KUBECONFIG=$KUBECONFIG_FILE
+                                        ansible-playbook -i localhost, playbookCICD.yaml
             }
         }
     }

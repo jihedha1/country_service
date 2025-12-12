@@ -5,11 +5,9 @@
 
   vars:
     image_name: my-country-service
-    image_tag: "build-{{ lookup('env', 'BUILD_NUMBER') }}" # Tag unique pour chaque build
+    image_tag: "build-{{ lookup('env', 'BUILD_NUMBER') }}"
     docker_registry_username: jihedhallem
     docker_registry_password: 53643810ji
-    kubernetes_api_key: "{{ lookup('env', 'K8S_API_TOKEN') }}"
-    kubernetes_api_host: "https://kubernetes.docker.internal:6443"
 
   tasks:
     - name: Log in to Docker Hub
@@ -26,7 +24,7 @@
         source: build
         state: present
 
-    - name: Push the Docker image to Docker Hub
+    - name: Push Docker image to Docker Hub
       community.docker.docker_image:
         name: "{{ docker_registry_username }}/{{ image_name }}:{{ image_tag }}"
         push: yes
@@ -37,15 +35,13 @@
         state: present
         namespace: jenkins
         src: deployment.yaml
+        kubeconfig: "{{ lookup('env','KUBECONFIG') }}"
         validate_certs: no
-        host: "{{ kubernetes_api_host }}"
-        api_key: "{{ kubernetes_api_key }}"
 
     - name: Apply Kubernetes Service
       kubernetes.core.k8s:
         state: present
         namespace: jenkins
         src: service.yaml
+        kubeconfig: "{{ lookup('env','KUBECONFIG') }}"
         validate_certs: no
-        host: "{{ kubernetes_api_host }}"
-        api_key: "{{ kubernetes_api_key }}"
