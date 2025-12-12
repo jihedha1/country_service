@@ -31,13 +31,13 @@ pipeline {
                 }
             }
         }
-        stage('3.SonarQube Analysis') {
-                    steps {
-                        withSonarQubeEnv('MySonarQubeServer') {
-                            sh "mvn sonar:sonar -Dsonar.projectKey=country-service"
-                        }
-                    }
-       }
+        //stage('3.SonarQube Analysis') {
+        //            steps {
+        //               withSonarQubeEnv('MySonarQubeServer') {
+        //                    sh "mvn sonar:sonar -Dsonar.projectKey=country-service"
+        //                }
+        //            }
+       //}
 
         stage('4. Deploy with Ansible') {
             steps {
